@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&amp;family=Instrument+Serif:ital@0;1&amp;display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: #FFFFFF; color: #101418; font-family: "Instrument Sans", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: #0F5C8C; text-decoration: none; }
+  a:hover { color: #0A4468; }
+  p { text-wrap: pretty; }
+  @media (max-width: 768px) {
+    .grid2 { grid-template-columns: 1fr !important; }
+    .grid4 { grid-template-columns: 1fr 1fr !important; }
+    .hero-h1 { font-size: 44px !important; }
+    .sec { padding: 48px 24px !important; }
+    .navlinks { display: none !important; } .nav-cta { display: none !important; } .nav-menu { display: inline-block !important; } .footer-grid { grid-template-columns: 1fr !important; }
+    #story h2, #team h2, #partners h2, #timeline h2 { font-size: 32px !important; }
+    .story-grid { grid-template-columns: 1fr !important; }
+    .tl-row { grid-template-columns: 1fr !important; gap: 8px !important; }
+  }
+  .nav-dd-menu { display: none; position: absolute; top: 100%; left: 0; padding-top: 14px; z-index: 40; }
+  .nav-dd:hover .nav-dd-menu { display: block; }
+  .navlinks a { white-space: nowrap; }
+  .reveal { opacity: 0; transform: translateY(28px); transition: opacity .8s cubic-bezier(.16,1,.3,1), transform .8s cubic-bezier(.16,1,.3,1); }
+  .reveal.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce){ .reveal, .reveal.in { opacity: 1 !important; transform: none !important; transition: none !important; } }
+  .nav-menu { position: static; display: none; }
+  .nav-menu summary { list-style: none; cursor: pointer; }
+  .nav-menu summary::-webkit-details-marker { display: none; }
+  .nav-menu summary::marker { content: ""; }
+  .hb { width: 44px; height: 44px; display: inline-flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px; }
+  .hb span { display: block; width: 26px; height: 2px; background: #101418; border-radius: 2px; transition: transform .3s cubic-bezier(.16,1,.3,1), opacity .2s ease; }
+  header.nav-open .hb span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+  header.nav-open .hb span:nth-child(2) { opacity: 0; }
+  header.nav-open .hb span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+  .menu-panel { position: absolute; left: 0; right: 0; top: 100%; background: #FFFFFF; border-bottom: 1px solid #E4E2DE; box-shadow: 0 24px 48px rgba(16,20,24,0.12); display: none; }
+  header.nav-open .menu-panel { display: block; animation: menuIn .34s cubic-bezier(.16,1,.3,1); }
+  @keyframes menuIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
+  .menu-inner { max-width: 1200px; margin: 0 auto; padding: 16px 24px 28px; display: flex; flex-direction: column; }
+  .menu-inner > a { color: #101418; font-size: 20px; padding: 12px 0; }
+  .menu-inner > a:hover { color: #0F5C8C; }
+</style>
+<script src="./image-slot.js"></script>
+<script>
+(function(){
+  var SEL = 'h1,h2,h3,h4,p,li,figure,blockquote,img,image-slot';
+  var SCOPED = SEL.split(',').map(function(s){return 'section '+s;}).join(',');
+  function check(){
+    var vh = window.innerHeight || document.documentElement.clientHeight;
+    document.querySelectorAll('.reveal:not(.in)').forEach(function(el){
+      var r = el.getBoundingClientRect();
+      if (r.top < vh * 0.92 && r.bottom > 0) el.classList.add('in');
+    });
+  }
+  var gid = 0;
+  function tag(){
+    [].slice.call(document.querySelectorAll(SCOPED)).forEach(function(el){
+      if (el.hasAttribute('data-rev')) return;
+      var anc = el.parentElement && el.parentElement.closest(SEL);
+      if (anc) return;
+      el.setAttribute('data-rev','1');
+      el.classList.add('reveal');
+      var p = el.parentElement;
+      if (p) {
+        if (p.__gid == null) { p.__gid = ++gid; p.__gc = 0; }
+        var i = p.__gc++;
+        el.style.transitionDelay = Math.min(i * 70, 420) + 'ms';
+      }
+    });
+    check();
+  }
+  function start(){
+    tag();
+    new MutationObserver(tag).observe(document.body, { childList: true, subtree: true });
+    document.addEventListener('scroll', check, true);
+    window.addEventListener('resize', check);
+    var n = 0, iv = setInterval(function(){ check(); if(++n > 20) clearInterval(iv); }, 150);
+  }
+  document.addEventListener('click', function(e){
+    var t = e.target;
+    var btn = t.closest && t.closest('.hb');
+    if (btn) { e.stopPropagation(); var hh = btn.closest('header'); if(hh){ var o = hh.classList.toggle('nav-open'); btn.setAttribute('aria-expanded', o?'true':'false'); } return; }
+    var link = t.closest && t.closest('.menu-inner a');
+    if (link) { var lh = link.closest('header'); if(lh) lh.classList.remove('nav-open'); return; }
+    var op = document.querySelector('header.nav-open');
+    if (op && !op.contains(t)) op.classList.remove('nav-open');
+  });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape'){ var oe = document.querySelector('header.nav-open'); if(oe){ oe.classList.remove('nav-open'); var b = oe.querySelector('.hb'); if(b) b.setAttribute('aria-expanded','false'); } } });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+})();
+</script>
+<script src="./translations.js"></script>
+<script src="./i18n.js"></script>
+</helmet>
+
+<div style="width: 100%; overflow-x: hidden; padding-top: 81px;">
+
+  <header style="position: fixed; top: 0; left: 0; right: 0; z-index: 40; background: rgba(255,255,255,0.96); border-bottom: 1px solid #E4E2DE;">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 20px 24px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 24px;">
+      <a href="index.html#top" style="justify-self: start; display: inline-flex; align-items: center;">
+        <img src="./assets/logo.png" alt="PERMEDIS — personalised medical solutions" style="display: block; height: 40px; width: auto;">
+      </a>
+      <nav class="navlinks" style="justify-self: center; display: flex; align-items: center; gap: 28px; font-size: 16px;">
+        <a href="index.html#top" style="color: #101418;" style-hover="color: #0F5C8C;">Početna</a>
+        <div class="nav-dd" style="position: relative;">
+          <a href="mjerni-uredaj.html" style="color: #101418; display: inline-flex; align-items: center; gap: 6px;" style-hover="color: #0F5C8C;">Prototipovi<svg width="10" height="6" viewBox="0 0 10 6" fill="none" style="margin-top:1px;"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+          <div class="nav-dd-menu">
+            <div style="background: #FFFFFF; border: 1px solid #E4E2DE; border-radius: 12px; box-shadow: 0 18px 40px rgba(16,20,24,0.12); padding: 8px; min-width: 240px; display: flex; flex-direction: column;">
+              <a href="mjerni-uredaj.html" style="color: #101418; padding: 12px 14px; border-radius: 8px;" style-hover="background: #F3F1EC; color: #0F5C8C;">Mehanički mjerni uređaj</a>
+              <a href="pesar.html" style="color: #101418; padding: 12px 14px; border-radius: 8px;" style-hover="background: #F3F1EC; color: #0F5C8C;">3D-printani pesar</a>
+            </div>
+          </div>
+        </div>
+        <a href="usluge.html" style="color: #101418;" style-hover="color: #0F5C8C;">Usluge</a>
+        <a href="o-nama.html" style="color: #0F5C8C; font-weight: 600;" style-hover="color: #0F5C8C;">O nama</a>
+        <a href="faq.html" style="color: #101418;" style-hover="color: #0F5C8C;">Česta pitanja</a>
+      </nav>
+      <div style="justify-self: end; display: flex; align-items: center; gap: 18px;">
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 14px;">
+          <span class="lang-opt" data-lang="hr" style="cursor: pointer; color: #101418; font-weight: 600;">HR</span>
+          <span style="color: #6C6F73;">/</span>
+          <span class="lang-opt" data-lang="en" style="cursor: pointer; color: #6C6F73;">EN</span>
+        </div>
+        <a class="nav-cta" href="kontakt.html" style="padding: 12px 22px; background: #0F5C8C; color: #FFFFFF; border-radius: 8px; font-weight: 600; font-size: 16px;" style-hover="background: #0A4468;">Kontakt</a>
+        <details class="nav-menu">
+          <summary class="hb" aria-label="Izbornik"><span></span><span></span><span></span></summary>
+          <div class="menu-panel">
+            <nav class="menu-inner">
+              <a href="index.html#top">Početna</a>
+              <div style="height: 1px; background: #EDEBE7; margin: 8px 0;"></div>
+              <div style="font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: #6C6F73; padding: 8px 0 4px;">Prototipovi</div>
+              <a href="mjerni-uredaj.html">Mehanički mjerni uređaj</a>
+              <a href="pesar.html">3D-printani pesar</a>
+              <div style="height: 1px; background: #EDEBE7; margin: 8px 0;"></div>
+              <a href="usluge.html">Usluge</a>
+              <a href="o-nama.html">O nama</a>
+              <a href="faq.html">Česta pitanja</a>
+              <a href="kontakt.html" style="margin-top: 12px; align-self: flex-start; padding: 14px 24px; background: #0F5C8C; color: #FFFFFF; border-radius: 8px; font-weight: 600; font-size: 17px;" style-hover="background: #0A4468;">Kontakt</a>
+            </nav>
+          </div>
+        </details>
+      </div>
+    </div>
+  </header>
+
+  <section id="top" class="sec" style="max-width: 1200px; margin: 0 auto; padding: 128px 24px 96px;">
+    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+      <span style="display: block; width: 8px; height: 8px; background: #0F5C8C; border-radius: 4px;"></span>
+      <span style="font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; color: #6C6F73;">O nama</span>
+    </div>
+    <h1 class="hero-h1" style="margin: 0; max-width: 100%; font-size: 76px; line-height: 1.04; font-weight: 600; letter-spacing: -0.02em">Mladi MedTech tim iz <span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 600; letter-spacing: 0.02em; color: #0F5C8C">Zagreba.</span></h1>
+    <div class="grid2" style="display: grid; grid-template-columns: 7fr 5fr; gap: 24px; margin-top: 48px; align-items: end;">
+      <p style="margin: 0; max-width: 60ch; font-size: 20px; line-height: 1.6; color: rgba(16,20,24,0.72);">PERMEDIS je hrvatski deep-tech startup nastao 2026. iz akademskog rada na Fakultetu strojarstva i brodogradnje. Razvijamo personalizirane medicinske uređaje koji koriste 3D printanje za bolju kliničku skrb.</p>
+      
+    </div>
+    <div style="margin-top: 96px; height: 460px; border-radius: 8px; overflow: hidden;">
+      <image-slot id="about-hero" shape="rect" placeholder="FOTOGRAFIJA TIMA U LABORATORIJU"></image-slot>
+    </div>
+  </section>
+
+  <section id="story" class="sec" style="max-width: 1200px; margin: 0 auto; padding: 32px 24px 128px;">
+    <span style="font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; color: #6C6F73;">Naša priča</span>
+    <div class="story-grid" style="display: grid; grid-template-columns: 5fr 7fr; gap: 64px; margin-top: 12px; align-items: start;">
+      <h2 style="margin: 0; font-size: 48px; line-height: 1.12; font-weight: 600; letter-spacing: -0.015em;">Od završnog rada do <span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 700; letter-spacing: 0.02em; color: #0F5C8C;">pravog startupa.</span></h2>
+      <div style="display: flex; flex-direction: column; gap: 24px;">
+        <p style="margin: 0; max-width: 62ch; font-size: 20px; line-height: 1.6; color: rgba(16,20,24,0.72);">PERMEDIS je počeo kao završni rad jednog inženjera koji je vidio očiglednu prazninu u medicinskoj industriji: zašto generička rješenja kada svaki pacijent ima jedinstvenu anatomiju?</p>
+        <p style="margin: 0; max-width: 62ch; font-size: 20px; line-height: 1.6; color: rgba(16,20,24,0.72);">Danas smo interdisciplinarni tim koji spaja strojarstvo i medicinu. Naš rad podržavaju profesori Sveučilišta u Zagrebu i klinički partneri iz KBC Zagreb. Trenutni fokus je ginekologija, a vizija je personalizirana rješenja u svakom medicinskom području dostupna svakom pacijentu, bez obzira na spol ili stanje.</p>
+        <p style="margin: 0; max-width: 62ch; font-size: 20px; line-height: 1.6; color: rgba(16,20,24,0.72);">Validirani u akademskom svijetu, sada gradimo prema kliničkoj primjeni. Korak po korak.</p>
+      </div>
+    </div>
+    <blockquote style="margin: 64px 0 0; padding: 40px 0 0; border-top: 1px solid #E4E2DE; text-align: center;">
+      <p style="margin: 0 auto; max-width: 100%; font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 56px; line-height: 1.15; color: #101418; text-wrap: balance;">Permedis gradi platformu koja spaja inženjerstvo i medicinu — rješenja oblikovana po mjeri svakog pacijenta.</p>
+      <p style="margin: 24px 0 0; font-size: 16px; letter-spacing: 0.04em; color: #6C6F73;">Stjepan Vranjković · Osnivač</p>
+    </blockquote>
+  </section>
+
+  <section id="team" class="sec" style="background: #F3F1EC; padding: 128px 0;">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 0 24px;">
+      <div class="grid2" style="display: grid; grid-template-columns: 7fr 5fr; gap: 24px; align-items: end;">
+        <div>
+          <span style="font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; color: #6C6F73;">Naš tim</span>
+          <h2 style="margin: 12px 0 0; font-size: 48px; line-height: 1.12; font-weight: 600; letter-spacing: -0.015em;">Interdisciplinarni tim&nbsp;</h2>
+        </div>
+        <p style="margin: 0; align-self: end; max-width: 60ch; font-size: 20px; line-height: 1.6; color: rgba(16,20,24,0.72);">Spajamo strojarstvo i kliničku medicinu. Akademski utemeljeni, klinički validirani, ambiciozno usmjereni.</p>
+      </div>
+      <div class="grid4" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 64px;">
+        <div>
+          <div style="aspect-ratio: 3 / 4; border-radius: 8px; overflow: hidden; background: #FFFFFF;">
+            <image-slot id="team-1" shape="rect" placeholder="Stjepan Vranjković"></image-slot>
+          </div>
+          <h3 style="margin: 20px 0 0; font-size: 22px; line-height: 1.2; font-weight: 600;">Stjepan Vranjković</h3>
+          <p style="margin: 6px 0 0; font-size: 16px; line-height: 1.4; color: #6C6F73;">Osnivač · Tehnički Voditelj</p>
+        </div>
+        <div>
+          <div style="aspect-ratio: 3 / 4; border-radius: 8px; overflow: hidden; background: #FFFFFF;">
+            <image-slot id="team-2" shape="rect" placeholder="Ivan Josipović"></image-slot>
+          </div>
+          <h3 style="margin: 20px 0 0; font-size: 22px; line-height: 1.2; font-weight: 600;">Ivan Josipović</h3>
+          <p style="margin: 6px 0 0; font-size: 16px; line-height: 1.4; color: #6C6F73;">Direktor</p>
+        </div>
+        <div>
+          <div style="aspect-ratio: 3 / 4; border-radius: 8px; overflow: hidden; background: #FFFFFF;">
+            <image-slot id="team-3" shape="rect" placeholder="Ivan Kovčalija"></image-slot>
+          </div>
+          <h3 style="margin: 20px 0 0; font-size: 22px; line-height: 1.2; font-weight: 600;">Ivan Kovčalija</h3>
+          <p style="margin: 6px 0 0; font-size: 16px; line-height: 1.4; color: #6C6F73;">Inženjering</p>
+        </div>
+        <div>
+          <div style="aspect-ratio: 3 / 4; border-radius: 8px; overflow: hidden; background: #FFFFFF;">
+            <image-slot id="team-4" shape="rect" placeholder="Anđela Tadić"></image-slot>
+          </div>
+          <h3 style="margin: 20px 0 0; font-size: 22px; line-height: 1.2; font-weight: 600;">Anđela Tadić</h3>
+          <p style="margin: 6px 0 0; font-size: 16px; line-height: 1.4; color: #6C6F73;">Korisnička Istraživanja</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="partners" class="sec" style="max-width: 1200px; margin: 0 auto; padding: 128px 24px;">
+    <span style="font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; color: #6C6F73;">U suradnji s</span>
+    <div class="grid2" style="display: grid; grid-template-columns: 7fr 5fr; gap: 24px; margin-top: 12px; align-items: end;">
+      <h2 style="margin: 0; font-size: 48px; line-height: 1.12; font-weight: 600; letter-spacing: -0.015em;">Akademski mentori i<br><span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 700; letter-spacing: 0.02em; color: #0F5C8C;">klinički partneri.</span></h2>
+      <p style="margin: 0; align-self: end; max-width: 60ch; font-size: 20px; line-height: 1.6; color: rgba(16,20,24,0.72);">Naš rad bi bio nemoguć bez podrške institucija koje vjeruju u personaliziranu medicinu. Validiraju nas, savjetuju i otvaraju vrata kliničkoj primjeni.</p>
+    </div>
+    <div class="grid4" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 64px;">
+      <div style="border: 1px solid #E4E2DE; border-radius: 12px; padding: 28px; display: flex; flex-direction: column; gap: 16px;">
+        
+        <h3 style="margin: 0; font-size: 20px; line-height: 1.25; font-weight: 600;">FSB Zagreb</h3>
+        <p style="margin: 0; font-size: 16px; line-height: 1.55; color: rgba(16,20,24,0.72);">Fakultet strojarstva i brodogradnje. Akademski mentori i tehnička podrška.</p>
+      </div>
+      <div style="border: 1px solid #E4E2DE; border-radius: 12px; padding: 28px; display: flex; flex-direction: column; gap: 16px;">
+        
+        <h3 style="margin: 0; font-size: 20px; line-height: 1.25; font-weight: 600;">KBC Zagreb</h3>
+        <p style="margin: 0; font-size: 16px; line-height: 1.55; color: rgba(16,20,24,0.72);">Klinički bolnički centar. Klinička validacija i medicinska ekspertiza.</p>
+      </div>
+      <div style="border: 1px solid #E4E2DE; border-radius: 12px; padding: 28px; display: flex; flex-direction: column; gap: 16px;">
+        
+        <h3 style="margin: 0; font-size: 20px; line-height: 1.25; font-weight: 600;">ZICER</h3>
+        <p style="margin: 0; font-size: 16px; line-height: 1.55; color: rgba(16,20,24,0.72);">Zagreb Innovation Centre. Tech Transfer Accelerator program.</p>
+      </div>
+      <div style="border: 1px solid #E4E2DE; border-radius: 12px; padding: 28px; display: flex; flex-direction: column; gap: 16px;">
+        
+        <h3 style="margin: 0; font-size: 20px; line-height: 1.25; font-weight: 600;">Sveučilište u Zagrebu</h3>
+        <p style="margin: 0; font-size: 16px; line-height: 1.55; color: rgba(16,20,24,0.72);">Akademska institucija. Intelektualno vlasništvo i istraživačka infrastruktura.</p>
+      </div>
+    </div>
+    <div class="grid2" style="display: grid; grid-template-columns: 7fr 5fr; gap: 24px; margin-top: 48px; align-items: center;">
+      <p style="margin: 0; max-width: 60ch; font-size: 20px; line-height: 1.6; color: rgba(16,20,24,0.72);">Tražite partnerstvo s nama? Otvoreni smo za istraživačke i kliničke kolaboracije diljem Europe.</p>
+      <div style="display: flex; justify-content: flex-end;">
+        <a href="kontakt.html" style="display: inline-flex; align-items: center; gap: 10px; padding: 16px 24px; background: #0F5C8C; color: #FFFFFF; border-radius: 8px; font-size: 16px; font-weight: 600;" style-hover="background: #0A4468;">Razgovarajmo
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#FFFFFF" stroke-width="1.8" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"></path></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section id="timeline" class="sec" style="background: #101418; color: #FFFFFF; padding: 128px 24px;">
+    <div style="max-width: 1200px; margin: 0 auto;">
+      <span style="font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.56);">Priznanja</span>
+      <div class="grid2" style="display: grid; grid-template-columns: 7fr 5fr; gap: 24px; margin-top: 12px; align-items: end;">
+        <h2 style="margin: 0; font-size: 48px; line-height: 1.12; font-weight: 600; letter-spacing: -0.015em; color: #FFFFFF;">Put kojim smo došli <span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 700; letter-spacing: 0.02em; color: #7FB6DE;">dovde.</span></h2>
+        <p style="margin: 0; align-self: end; max-width: 52ch; font-size: 20px; line-height: 1.6; color: rgba(255,255,255,0.72);">Od prvog koncepta do akcelerator programa, kronologija ranog rasta.</p>
+      </div>
+      <div style="margin-top: 64px; border-top: 1px solid rgba(255,255,255,0.14);">
+        <div class="tl-row" style="display: grid; grid-template-columns: 3fr 9fr; gap: 40px; padding: 40px 0; border-bottom: 1px solid rgba(255,255,255,0.14);">
+          <div style="font-size: 15px; letter-spacing: 0.06em; text-transform: uppercase; color: #7FB6DE;">Siječanj 2026</div>
+          <div>
+            <h4 style="margin: 0; font-size: 26px; line-height: 1.2; font-weight: 600; color: #FFFFFF;">Osnivanje PERMEDIS j.d.o.o.</h4>
+            <p style="margin: 12px 0 0; max-width: 62ch; font-size: 19px; line-height: 1.6; color: rgba(255,255,255,0.72);">Formalno osnivanje društva u Zagrebu i ulazak u ZICER Tech Transfer Accelerator program.</p>
+          </div>
+        </div>
+        <div class="tl-row" style="display: grid; grid-template-columns: 3fr 9fr; gap: 40px; padding: 40px 0; border-bottom: 1px solid rgba(255,255,255,0.14);">
+          <div style="font-size: 15px; letter-spacing: 0.06em; text-transform: uppercase; color: #7FB6DE;">Studeni 2025</div>
+          <div>
+            <h4 style="margin: 0; font-size: 26px; line-height: 1.2; font-weight: 600; color: #FFFFFF;">Zlatna medalja ARCA 2025</h4>
+            <p style="margin: 12px 0 0; max-width: 62ch; font-size: 19px; line-height: 1.6; color: rgba(255,255,255,0.72);">Najviše priznanje na međunarodnoj izložbi inovacija ARCA u Zagrebu.</p>
+          </div>
+        </div>
+        <div class="tl-row" style="display: grid; grid-template-columns: 3fr 9fr; gap: 40px; padding: 40px 0; border-bottom: 1px solid rgba(255,255,255,0.14);">
+          <div style="font-size: 15px; letter-spacing: 0.06em; text-transform: uppercase; color: #7FB6DE;">Listopad 2025</div>
+          <div>
+            <h4 style="margin: 0; font-size: 26px; line-height: 1.2; font-weight: 600; color: #FFFFFF;">Best Paper na MATRIB 2025</h4>
+            <p style="margin: 12px 0 0; max-width: 62ch; font-size: 19px; line-height: 1.6; color: rgba(255,255,255,0.72);">Naš znanstveni rad nagrađen je kao najbolji na međunarodnoj konferenciji o materijalima i tribologiji.</p>
+          </div>
+        </div>
+        <div class="tl-row" style="display: grid; grid-template-columns: 3fr 9fr; gap: 40px; padding: 40px 0; border-bottom: 1px solid rgba(255,255,255,0.14);">
+          <div style="font-size: 15px; letter-spacing: 0.06em; text-transform: uppercase; color: #7FB6DE;">Lipanj 2025</div>
+          <div>
+            <h4 style="margin: 0; font-size: 26px; line-height: 1.2; font-weight: 600; color: #FFFFFF;">Rektorova nagrada Sveučilišta u Zagrebu</h4>
+            <p style="margin: 12px 0 0; max-width: 62ch; font-size: 19px; line-height: 1.6; color: rgba(255,255,255,0.72);">Priznanje za izvrsnost u istraživačkom radu na razini Sveučilišta.</p>
+          </div>
+        </div>
+        <div class="tl-row" style="display: grid; grid-template-columns: 3fr 9fr; gap: 40px; padding: 40px 0; border-bottom: 1px solid rgba(255,255,255,0.14);">
+          <div style="font-size: 15px; letter-spacing: 0.06em; text-transform: uppercase; color: #7FB6DE;">Svibanj 2025</div>
+          <div>
+            <h4 style="margin: 0; font-size: 26px; line-height: 1.2; font-weight: 600; color: #FFFFFF;">Prvi prototipovi predstavljeni na MTECH 2025</h4>
+            <p style="margin: 12px 0 0; max-width: 62ch; font-size: 19px; line-height: 1.6; color: rgba(255,255,255,0.72);">Početak javnog predstavljanja koncepta na međunarodnoj konferenciji.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer style="background: #101418; border-top: 1px solid rgba(255,255,255,0.12); padding: 64px 24px;">
+    <div class="footer-grid" style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px 40px;">
+      <div>
+        <img src="./assets/logo.png" alt="PERMEDIS — personalised medical solutions" style="display: block; height: 52px; width: auto; filter: brightness(0) invert(1);">
+        <p style="margin: 16px 0 0; max-width: 40ch; font-size: 16px; line-height: 1.6; color: rgba(255,255,255,0.56);">Personalizirani medicinski proizvodi izrađeni po stvarnoj anatomiji.</p>
+      </div>
+      <div>
+        <div style="font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.56);">Kompanija</div>
+        <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 12px; font-size: 16px;">
+          <a href="index.html#top" style="color: #FFFFFF;">Početna</a>
+          <a href="usluge.html" style="color: #FFFFFF;">Usluge</a>
+          <a href="o-nama.html" style="color: #FFFFFF;">O nama</a>
+          <a href="kontakt.html" style="color: #FFFFFF;">Kontakt</a>
+        </div>
+      </div>
+      <div>
+        <div style="font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.56);">Priznanja</div>
+        <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 12px; font-size: 16px;">
+          <span style="color: rgba(255,255,255,0.72);">ARCA 2025, zlatna medalja</span>
+          <span style="color: rgba(255,255,255,0.72);">MATRIB 2025, najbolji rad</span>
+          <span style="color: rgba(255,255,255,0.72);">Rektorova nagrada</span>
+        </div>
+      </div>
+      <div>
+        <div style="font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.56);">Kontakt</div>
+        <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 12px; font-size: 16px; color: rgba(255,255,255,0.72);">
+          <a href="mailto:info@permedis.com" style="color: #FFFFFF;">info@permedis.com</a>
+          <span>Avenija Dubrovnik 15<br>10000 Zagreb</span>
+          <span>Stjepan Vranjković<br>Founder &amp; CEO</span>
+        </div>
+      </div>
+      <div style="grid-column: 1 / -1; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.12); display: flex; flex-direction: column; gap: 16px;">
+        <img src="./assets/zicer-logo.svg" alt="ZICER" width="210" height="66" style="display: block; width: 210px; height: auto; filter: brightness(0) invert(1);">
+        <span style="max-width: 40ch; font-size: 14px; line-height: 1.6; color: rgba(255,255,255,0.56);">Član ZICER akceleratora.</span>
+      </div>
+      <div style="grid-column: 1 / -1; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.12); display: flex; flex-direction: column; gap: 16px; font-size: 14px; color: rgba(255,255,255,0.56);">
+        <span>PERMEDIS d.o.o., Avenija Dubrovnik 15, 10000 Zagreb · OIB 33958600636 · © 2026</span>
+        <span style="display: flex; gap: 24px;">
+          <a href="#" style="color: rgba(255,255,255,0.56);">Privatnost</a>
+          <a href="#" style="color: rgba(255,255,255,0.56);">Uvjeti</a>
+        </span>
+      </div>
+    </div>
+  </footer>
+
+</div>
+</x-dc>
+</body>
+</html>
